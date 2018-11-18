@@ -7,10 +7,16 @@ import Ionicon from 'react-ionicons'
 import {GridList, GridTile} from 'material-ui/GridList';
 import Subheader from 'material-ui/Subheader';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {_, sortBy} from 'lodash';
 
 const album_id = '2Kk4EVi';
 const Imgur_Client_Id = '06e18547aec23a5';
 //const Imgur_Client_Secrety = '8bfc8ba8c9da2d6afa1aa9aa46f76f22bb204b50';
+
+
+const SORTS = {
+    TITLE: list => sortBy(list, 'title')
+};
 
 const styles = {
     root: {
@@ -70,6 +76,7 @@ class ImageGallery extends React.Component{
 
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <NavigationBar/>
@@ -83,7 +90,7 @@ class ImageGallery extends React.Component{
                             cols={3}
                         >
                             <Subheader>Photo Gallery (Imgur)</Subheader>
-                            {this.state.gallery.map((obj) => (
+                            {imageList.map((obj) => (
                                 <GridTile
                                     key={obj.id}
                                     title={obj.title}

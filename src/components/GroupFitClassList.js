@@ -10,10 +10,97 @@ import TimePicker from 'material-ui/TimePicker';
 import DatePicker from 'material-ui/DatePicker';
 import moment from 'moment'
 import axios from "axios/index";
+import {sortBy} from "lodash";
 
 const album_id = '2Kk4EVi';
 const Imgur_Client_Id = '06e18547aec23a5';
 //const Imgur_Client_Secrety = '8bfc8ba8c9da2d6afa1aa9aa46f76f22bb204b50';
+
+
+const CLASS_DESCRIPTION = [
+    {
+        title: "Cardio Blast",
+        description: "Prepare to sweat with forms of cardio ranging from cycling, rowing, using BOSU's, jump ropes, and various other pieces of equipment. The sky is the limit with this class! If you like variety, this class is for you!",
+    },
+    {
+        title: "Spinning®",
+        description: "A motivating group environment, intense training and music that begs your legs to pedal. You’ll find yourself having a blast while you ride your way to a leaner, stronger body. Towel and water bottle required for all classes. New patrons are encouraged to arrive at least 10 minutes prior to the start of class to go over correct bike set-up with the instructor.",
+    },
+    {
+        title: "Kickboxing",
+        description: "Kick and punch towards your goals. Juice up speed, strength, and agility with this intense and fun class. A high energy blend of kicks and punches built into combinations and set to upbeat music. This “kick-butt” workout is a great blend of martial arts, boxing, and cardio.",
+    },
+    {
+        title: "Throwdown Thursday Spinning®",
+        description: "Two of your favorite artists will battle it out every Thursday. Artists will face each other song by song against their peers, rivals, or frenemies in this high-energy, interval-style Spinning® class. Past battles have included Katy Perry and Taylor Swift, and Madonna and George Michael. Get ready to sweat, sing, and have a great time!",
+    },
+    {
+        title: "ZUMBA®",
+        description: "Zumba fuses hypnotic Latin rhythms and easy to follow moves to create a dynamic workout system that will blow you away. The routines feature interval training sessions where fast and slow rhythms and resistance training are combined to tone and sculpt your body."
+    },
+    {
+        title: "Indo-Row®",
+        description: "Join us for this unique indoor rowing workout where you will learn proper body mechanics of rowing by using your lower body, core and upper body to break a sweat while having fun. You will work in teams, with a partner, and as one crew to provide a great overall body workout. This class is perfect for all fitness levels. Come see why they call this the Perfect Calorie Burn!",
+    },
+    {
+        title: "SilverSneakers® Classic",
+        description: "The classes program is designed to improve agility, balance, coordinator and incorporates daily living activities to improve overall health and well-being.",
+    },
+    {
+        title: "SilverSneakers® Circuit",
+        description: "Combine fun with fitness to increase your cardiovascular and muscular endurance power with a standing circuit workout. Upper-body strength work with hand-held weights, elastic tubing with handles, and a SilverSneakers® ball, alternating low-impact aerobics choreography. A chair is used for standing support, stretching, and relaxation exercises.",
+    },
+    {
+        title: "SilverSneakers® Yoga",
+        description: "Throughout the class participants will focus on poses and posture to improve breathing, flexibility, balance, muscular strength and endurance, and joint range of motion.",
+    },
+    {
+        title: "Vinyasa Yoga 1",
+        description: "This class focuses on the alignment/form of individual postures. Basic postures are held for longer periods of time to explore the refinements of aligning the body, and the class usually includes a restorative posture. Anyone new to yoga or wishing to explore the basics in more detail in a slow flowing yoga class will find Vinyasa Yoga 1 a good starting point. ",
+    },
+    {
+        title: "Vinyasa Yoga 2",
+        description: "This class introduces more sun salutations and more challenging postures than Vinyasa Yoga 1. It can also include an alignment segment focusing on one posture or a featured emphasis among several postures. Prior yoga experience useful but not needed. Suitable for people who are moderately fit.",
+    },
+    {
+        title: "Vinyasa Yoga 3",
+        description: "A vigorous practice that builds on the other Vinyasa classes and involves more complicated sequences and more challenging arm balances and inversions. Prior yoga experience is highly recommended.",
+    },
+    {
+        title: "Yoga Pilates",
+        description: "This class combines the best of Pilates and Vinyasa Yoga to provide both the strength, flexibility, and balance that yoga develops along with the isolated core work that Pilates offers. Prior experience in yoga or pilates is recommended.",
+    },
+    {
+        title: "Bootcamp",
+        description: "Workouts are designed to improve your overall fitness with exercises meant challenge your strength, cardiovascular ability, flexibility, agility, and endurance. Bootcamp will utilize different exercise equipment, including your own body. This total body workout will leave you feeling like you've accomplished something great!   ",
+    },
+    {
+        title: "Kettlebell",
+        description: "Learn the basic movements and compound exercises to build functional strength and muscular endurance, in addition to enhancing your mobility and metabolic conditioning. This will be challenging but accessible to all levels of fitness. No previous kettlebell experience is required.",
+    },
+    {
+        title: "TRX® Total Body",
+        description: "Born in the Navy SEALs, TRX Suspension Training® is a revolutionary method of leveraged bodyweight exercise to develop strength, balance, flexibility, and core stability simultaneously. Be in control of the intensity by adjusting your body position to increase or decrease resistance and work your body in a whole new way.",
+    },
+    {
+        title: "Hard Core Abs",
+        description: "Feel like you can’t do another sit-up? Bend, twist, and plank you way to a stronger core and six-pack abs! ",
+    },
+    {
+        title: "Tabata Bootcamp",
+        description: " Based on the popular Tabata training practice, this high-intensity interval training class (HIIT) involves a repeating pattern of 20 seconds of maximum cardio work followed by 10 seconds of rest. A wide-array of exercises are included that can be modified to accommodate all fitness levels. Get ready to sweat and push it to the next max!  ",
+    },
+    {
+        title: "Total Body Tone",
+        description: "This full body, non-aerobic class is designed to improve muscular strength and endurance using body bars, BOSU balance trainers, dumbbells, stability balls, resistance tubes and more! Modifications will be given to accommodate all fitness levels.",
+    },
+    {
+        title: "Functional Fitness",
+        description: "Follows a similar format to CrossFit & embraces some of the same foundations that community builds upon. Each class features a variety of barbell, kettlebell, body-weight, and dumbbell exercises that are scalable to meet challenges of a wide variety of fitness levels. Beginners need to ask questions and focus on technique starting out."
+    },
+    ];
+
+const SORTED_CLASS_DESCRIPTION = sortBy(CLASS_DESCRIPTION, "title");
 
 
 const DELETE_GFCLASS = gql`
@@ -31,8 +118,9 @@ const GF_CLASS_LIST = gql`
             imageUrl
             title
             instructor{firstName, email, id}
-            days{name}
+            days(orderBy: name_DESC){name}
             time
+            cancelled
             startTime
             endTime
             createdAt
@@ -43,8 +131,9 @@ const GF_CLASS_LIST = gql`
             category{title, id}
         }
         allDays{id,name},
-        allInstructors{id, firstName, lastName email}
+        allInstructors(orderBy: firstName_ASC){id, firstName, lastName email}
         allFacilities{facilityName, id}
+        allGroupFitnessClassCategories{id, title}
     }
 `
 
@@ -55,6 +144,7 @@ const SINGLE_GF_CLASS = gql`
             title
             time
             imageUrl
+            cancelled
             startTime
             endTime
             instructor{firstName, lastName email, id}
@@ -76,6 +166,14 @@ const GF_CLASS_ISPUBLISHED = gql`
     mutation updateIsPublished($id: ID!, $show: Boolean){
         updateGroupFitClass(id:$id, isPublished: $show){
             isPublished
+        }
+    }
+`
+
+const GF_CLASS_ISCANCELLED = gql`
+    mutation updateIsCancelled($id: ID!, $cancelled: Boolean){
+        updateGroupFitClass(id:$id, cancelled: $cancelled){
+            cancelled
         }
     }
 `
@@ -120,14 +218,15 @@ const UPDATE_GFCLASS = gql`
 `
 
 const CREATE_GFCLASS = gql`
-    mutation ($title: String!, $time: String!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $idGFI: ID!, $location: ID, $imageUrl: String, $description: String,) {
-        createGroupFitClass(title: $title, time: $time, daysIds: $daysArr, instructorId: $idGFI, locationId: $location, imageUrl: $imageUrl, description: $description,  startTime: $startTime, endTime: $endTime) {
+    mutation ($title: String!, $time: String!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $idGFI: ID!, $location: ID, $imageUrl: String, $description: String, $category: [ID!]) {
+        createGroupFitClass(title: $title, time: $time, daysIds: $daysArr, instructorId: $idGFI, locationId: $location, imageUrl: $imageUrl, description: $description,  startTime: $startTime, endTime: $endTime, categoryIds: $category) {
             id
             title
             time
             location {facilityName, id}
             instructor {id, firstName}
             days {id, name}
+            category{title, id}
             description
             startTime
             endTime
@@ -183,6 +282,61 @@ const EditIsPublished = ({id, checked}) => {
                                 }
                             }}
                         />
+                </form>
+            )}
+        </Mutation>
+    )
+}
+
+/******* Cancellation Status of GroupFitClass **********/
+
+const EditIsCancelled = ({id, checked}) => {
+    return(
+        <Mutation mutation={GF_CLASS_ISCANCELLED}>
+            {(updateGroupFitClass, {data}) => (
+                <form style={{flexDirection: 'column', display: 'flex', alignItems: 'center', justifyContent:'center'}}>
+                    <label style={{flexDirection: 'row', display:'flex'}}>Yes
+                    <input
+                        style={{marginLeft: 5}}
+                        type={"checkbox"}
+                        name={"True"}
+                        value={true}
+                        checked={checked === true}
+                        onChange={ e => {
+                            if(window.confirm("Do you want to show that the class is cancelled?")){
+                                updateGroupFitClass({
+                                    variables: {
+                                        id,
+                                        cancelled: true
+                                    },
+                                    refetchQueries: [ { query: SINGLE_GF_CLASS, variables: {id} }],
+                                });
+                                console.log("GroupFitClass with id: " + id + " was cancelled.");
+                            }
+                        }}
+                    />
+                    </label>
+                    <label >No
+                    <input
+                        style={{marginLeft: 8}}
+                        type={"checkbox"}
+                        value={false}
+                        checked={checked === false}
+                        name={"False"}
+                        onChange={ e => {
+                            if(window.confirm("Do you want to show the class as uncancelled?")){
+                                updateGroupFitClass({
+                                    variables: {
+                                        id,
+                                        cancelled: false
+                                    },
+                                    refetchQueries: [ { query: SINGLE_GF_CLASS, variables: {id} }],
+                                });
+                                console.log("GroupFitClass with id: " + id + " is no longer cancelled");
+                            }
+                        }}
+                    />
+                    </label>
                 </form>
             )}
         </Mutation>
@@ -375,7 +529,7 @@ class UpdateGroupFitClass extends React.Component{
                 daysArr: this.state.checkedDays
             },
             refetchQueries:[
-                {query: GF_CLASS_LIST}
+                {query: GF_CLASS_LIST},
             ]
         })
 
@@ -394,7 +548,7 @@ class UpdateGroupFitClass extends React.Component{
                     category: this.state.categoryTypes,
                 },
                 refetchQueries:[
-                    {query: GF_CLASS_LIST}
+                    {query: GF_CLASS_LIST,},
                 ]
             })
 
@@ -404,7 +558,7 @@ class UpdateGroupFitClass extends React.Component{
     };
 
     render(){
-
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <div className={"justify-center alignItems-center"}>
@@ -473,10 +627,16 @@ class UpdateGroupFitClass extends React.Component{
                                                         name={"Instructors"}
                                                         value={this.state.newInstructorSelection}
                                                         onChange={this.handleNewInstructorSelection}
-                                                        defaultChecked={data.GroupFitClass.instructor.id}
+                                                        defaultChecked={data.GroupFitClass.instructor ? data.GroupFitClass.instructor.id : "unassigned" }
                                                         className="form-select"
                                                     >
-                                                        <option value={data.GroupFitClass.instructor.id}>{'Current: ' + data.GroupFitClass.instructor.lastName + ', ' + data.GroupFitClass.instructor.firstName}</option>
+
+                                                        {data.GroupFitClass.instructor
+                                                            ? (<option value={data.GroupFitClass.instructor.id}>
+                                                                    {'Current: ' + data.GroupFitClass.instructor.firstName + ' ' + data.GroupFitClass.instructor.lastName}
+                                                                </option>)
+                                                            : (<option>{'unassigned'}</option>)
+                                                        }
                                                         {instructorArr.map(opt => {
                                                             return (
                                                                 <option key={opt.id} value={opt.id}>
@@ -504,7 +664,7 @@ class UpdateGroupFitClass extends React.Component{
                                                         className={"form-select"}
                                                     >
                                                         <option style={{marginLeft: 10}}>Select New Image</option>
-                                                        {this.state.gallery.map((obj) => (
+                                                        {imageList.map((obj) => (
                                                             <option key={obj.id} value={obj.link}>
                                                                 {obj.title}
                                                             </option>
@@ -537,6 +697,23 @@ class UpdateGroupFitClass extends React.Component{
                                                     <div style={{backgroundColor: "#c2d9c3", width: "33.33%", height: 250, padding:10, border: '1px solid gray' }}>
                                                     <label style={{textAlign: 'center', marginRight: 20}}>Description:</label>
                                                     <br/>
+                                                    <select
+                                                        name={"description"}
+                                                        className={"form-select"}
+                                                        style={{width: 300}}
+                                                        value={this.state.description}
+                                                        onChange={(e) => {this.setState({description: e.target.value})}}
+                                                    >
+                                                        <option>Select Class-Description</option>
+                                                        {SORTED_CLASS_DESCRIPTION.map((obj, index) =>
+                                                            <option key={index} value={obj.description}>
+                                                                {obj.title}
+                                                            </option>
+                                                        )}
+
+                                                    </select>
+                                                    <br/>
+                                                    <label style={{textAlign: 'center', marginRight: 20}}>... or enter your own</label>
                                                     <textarea
                                                         style={{width: 250}}
                                                         rows={5}
@@ -682,7 +859,7 @@ class UpdateGroupFitClass extends React.Component{
     }
 }
 
-const UpdateTheGFClass = graphql(UPDATE_GFCLASS, {options: { fetchPolicy: 'network-only' }})(UpdateGroupFitClass);
+const UpdateTheGFClass = graphql(UPDATE_GFCLASS, {options: {fetchPolicy: 'network-only'}})(UpdateGroupFitClass);
 
 /*******Creates GroupFitClass**********/
 
@@ -705,6 +882,7 @@ class CreateGroupFitClass extends React.Component{
             modalIsOpen: false,
             isPublished: false,
             checkedDays:[],
+            categoryTypes: [],
             newInstructorSelection:'',
         };
         this.closeModal = this.closeModal.bind(this);
@@ -719,6 +897,7 @@ class CreateGroupFitClass extends React.Component{
         this._handleTitleValue = this._handleTitleValue.bind(this);
         this._handleStartEndTimeUpdate = this._handleStartEndTimeUpdate.bind(this);
         this._handleDaysUpdate = this._handleDaysUpdate.bind(this);
+        this._handleClassCategoryTypeCheck = this._handleClassCategoryTypeCheck.bind(this);
     }
     _handleChangeStartDate = (event, date) =>{
         let newDate = date;
@@ -754,6 +933,18 @@ class CreateGroupFitClass extends React.Component{
         }
         this.setState({checkedDays: newCheckedDayList}, () => console.log('day selection', this.state.checkedDays));
         console.log(this.state.checkedDays)
+    }
+    _handleClassCategoryTypeCheck(e){
+        let newSelection = e.target.value;
+        let newCheckedCategoryTypeList;
+
+        if(this.state.categoryTypes.indexOf(newSelection) > -1){
+            newCheckedCategoryTypeList = this.state.categoryTypes.filter(s => s !== newSelection)
+        } else {
+            newCheckedCategoryTypeList = [...this.state.categoryTypes, newSelection];
+        }
+        this.setState({categoryTypes: newCheckedCategoryTypeList}, () => console.log('category type selection', this.state.categoryTypes));
+        console.log(this.state.categoryTypes)
     }
     handleNewInstructorSelection(e) {
         this.setState({ newInstructorSelection: e.target.value }, () => console.log('new instructor', this.state.newInstructorSelection));
@@ -868,6 +1059,7 @@ class CreateGroupFitClass extends React.Component{
                     startTime: start,
                     endTime: end,
                     location: this.state.location,
+                    category: this.state.categoryTypes,
 
                 },
                 refetchQueries:[
@@ -877,6 +1069,8 @@ class CreateGroupFitClass extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
+
         return(
             <div>
                 <button
@@ -941,7 +1135,7 @@ class CreateGroupFitClass extends React.Component{
                                         {this.props.instructorList.map(opt => {
                                             return (
                                                 <option key={opt.id} value={opt.id}>
-                                                    {opt.lastName}, {opt.firstName}
+                                                    {opt.firstName} {opt.lastName}
                                                 </option>
                                             );
                                         })}
@@ -954,7 +1148,7 @@ class CreateGroupFitClass extends React.Component{
                                         className={"form-select"}
                                     >
                                         <option style={{marginLeft: 10}}>Select New Image</option>
-                                        {this.state.gallery.map((obj) => (
+                                        {imageList.map((obj) => (
                                             <option key={obj.id} value={obj.link}>
                                                 {obj.title}
                                             </option>
@@ -985,6 +1179,24 @@ class CreateGroupFitClass extends React.Component{
                                 <div>
                                     <label style={{textAlign: 'center', marginRight: 15}}>Description:</label>
                                     <br/>
+                                    <select
+                                        name={"description"}
+                                        className={"form-select"}
+                                        style={{width: 300}}
+                                        value={this.state.description}
+                                        onChange={(e) => {this.setState({description: e.target.value})}}
+                                    >
+                                        <option>Class-Descriptions</option>
+                                        {SORTED_CLASS_DESCRIPTION.map((obj, index) =>
+                                            <option key={index} value={obj.description}>
+                                                {obj.title}
+                                            </option>
+                                        )}
+
+                                    </select>
+                                    <br/>
+                                    <label style={{textAlign: 'center', marginRight: 15}}>... or enter your own</label>
+                                    <br/>
                                     <textarea
                                         style={{width: 600}}
                                         rows={3}
@@ -996,7 +1208,7 @@ class CreateGroupFitClass extends React.Component{
                                 <br />
                                 <div style={{border: '1px dotted black', padding: 30}}>
 
-                                    <label className='w-40 pa3 mv2' style={{marginTop: 40}}>Select Schedule Days:</label>
+                                    <label className='w-40 pa3 mv2' style={{marginTop: 20}}>Select Schedule Days:</label>
                                     <br />
                                     {this.props.days.map((obj, index) =>
                                         <div style={{display:"inline", }} key={index}>
@@ -1012,6 +1224,25 @@ class CreateGroupFitClass extends React.Component{
                                     )}
                                 </div>
                                 <br />
+                                <div style={{  border: "1px dotted black", padding:30, textAlign:'center', justifyContent:'center',  marginBottom: 20}}>
+
+                                    <label >Select Class Category Types:</label>
+                                    <div style={{ display:'flex', flexDirection: 'row', marginTop: 20, textAlign: 'center', justifyContent: 'center'}}>
+                                        <br />
+                                        {this.props.categoryList.map((obj, index) =>
+                                            <div style={{display: 'inline'}} key={index}>
+                                                <label key={index} style={{marginLeft: 20, fontWeight:"normal"}}>{obj.title}</label>
+                                                <input
+                                                    style={{marginLeft: 10}}
+                                                    type={"checkbox"}
+                                                    value={obj.id}
+                                                    checked={this.state.categoryTypes.indexOf(obj.id) > -1}
+                                                    onChange={this._handleClassCategoryTypeCheck }
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                                 <div style={{display: 'center', border: "1px dotted black",  alignContent:'center', alignItems:'center', textAlign:'center', justifyContent:'center', padding: 30}}>
                                     <label className='w-40 pa3 mv2'>Publish Date & Time:</label>
 
@@ -1034,12 +1265,12 @@ class CreateGroupFitClass extends React.Component{
                                                         onChange={this._handleChangeEndDate}
                                                         floatingLabelText="End Date"
                                                         value={this.state.endDate}
-                                                        className={"col s6 light-blue lighten-1 grey-text text-lighten-5"}
+                                                        className={"col s4 light-blue lighten-1 grey-text text-lighten-5"}
                                                     />
                                                 </div>
                                                 <div style={{display: 'flex',  flexDirection: "column", alignItems: 'center', marginLeft: 70}}>
                                                     <TimePicker
-                                                        style={{fontWeight:"bold", marginTop: 25, fontSize:12, display:'inline'}}
+                                                        style={{fontWeight:"bold",  fontSize:12, display:'inline'}}
                                                         hintText={'Start Time'}
                                                         minutesStep={5}
                                                         value={this.state.startTime}
@@ -1047,7 +1278,7 @@ class CreateGroupFitClass extends React.Component{
                                                         floatingLabelText={"Start Time"}
                                                     />
                                                     <TimePicker
-                                                        style={{fontWeight:"bold", marginTop: 25, fontSize:12, display:'inline'}}
+                                                        style={{fontWeight:"bold", fontSize:12, }}
                                                         hintText={'End Time'}
                                                         minutesStep={5}
                                                         value={this.state.endTime}
@@ -1108,7 +1339,7 @@ class GroupFitClassList extends React.Component{
                             <NavigationBar/>
                             <div style={{display:'flex', flexDirection:'row', marginLeft: 10}}>
                                 <h2>GroupFit Class</h2>
-                                <CreateTheGFClass facilityList={data.allFacilities} instructorList={data.allInstructors} days={data.allDays}/>
+                                <CreateTheGFClass facilityList={data.allFacilities} instructorList={data.allInstructors} days={data.allDays} categoryList={data.allGroupFitnessClassCategories}/>
                             </div>
                             <div >
                                 <table style={{margin: 10, padding: 20, }}>
@@ -1117,6 +1348,7 @@ class GroupFitClassList extends React.Component{
                                         <th className={"th"}>Image</th>
                                         <th className={"th"}>Title</th>
                                         <th className={"th"}>Display Time</th>
+                                        <th className={"th"}>Cancel</th>
                                         <th className={"th"}>Days</th>
                                         <th className={"th"}>Instructor</th>
                                         <th className={"th"}>Published?</th>
@@ -1125,13 +1357,18 @@ class GroupFitClassList extends React.Component{
                                         <th className={"th"}>Location & Type</th>
                                         <th className={"th"}>Description</th>
                                     </tr>
-                                {data.allGroupFitClasses.map(({title, time, id, days, instructor, isPublished, imageUrl, startTime, endTime, location, description, category}) => (
+                                {data.allGroupFitClasses.map(({title, time, id, days, instructor, cancelled, isPublished, imageUrl, startTime, endTime, location, description, category}) => (
                                     <tr key={id}>
                                         <td style={{ border:'2px solid black',  width: 150, textAlign: 'center'}}><img style={{height: 100, width: 160}} src={imageUrl} alt={title} /></td>
                                         <td className={"td"}>{title}</td>
                                         <td className={"td"}>{time}</td>
+                                        <td className={"td"}><EditIsCancelled id={id} checked={cancelled}/></td>
                                         <td className={"td"}>{days.map(({name}) => name).join(", ")}</td>
-                                        <td className={"td"}>{instructor.firstName}</td>
+                                    {instructor === null
+                                        ? (<td className={"td"}>{"un-assigned"}</td>)
+                                        : ( <td className={"td"}>{instructor.firstName}</td>)
+                                    }
+
                                         <td className={"td"}><EditIsPublished id={id} checked={isPublished}/></td>
                                         <td className={"td"}>{moment(startTime).format('h:mm a')} <br/><br/> {moment(startTime).format("M/D/Y")}</td>
                                         <td className={"td"}>{moment(endTime).format('h:mm a')} <br/><br/> {moment(endTime).format("M/D/Y")}</td>

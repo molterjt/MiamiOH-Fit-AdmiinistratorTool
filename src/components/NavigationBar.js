@@ -26,6 +26,7 @@ class NavigationBar extends React.Component{
                             <NavDropdown eventKey={3} title="Users" id="basic-nav-dropdown">
                                 <MenuItem eventKey={3.1} href={"/userlist"}>User List</MenuItem>
                                 <MenuItem eventKey={3.2} href={"/comments"}>User Comments</MenuItem>
+                                <MenuItem eventKey={3.2} href={"/usercheckinlist"}>User CheckIns</MenuItem>
                                 <MenuItem divider />
                                 <MenuItem eventKey={3.3}>User Data</MenuItem>
                             </NavDropdown>
@@ -42,6 +43,7 @@ class NavigationBar extends React.Component{
                                 <MenuItem eventKey={7.1} href={"/newsItems"}>News-Items</MenuItem>
                                 <MenuItem eventKey={7.2} href={"/marketingAds"}>Marketing Ads</MenuItem>
                             </NavDropdown>
+                            <NavItem eventKey={8} title={"Facilities"} href={"/facilityList"}>Facilities</NavItem>
                         </Nav>
 
                     </Nav>

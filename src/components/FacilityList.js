@@ -8,98 +8,101 @@ import axios from "axios/index";
 import moment from 'moment';
 import {sortBy} from "lodash";
 
-const album_id = '2Kk4EVi';
+const album_id = 'Em3x3iE';
 const Imgur_Client_Id = '06e18547aec23a5';
 
-const ALL_NEWSITEMS = gql`
+const ALL_FACILITY = gql`
     query{
-        allNewsItems(orderBy: updatedAt_DESC){
+        allFacilities{
             id
-            title
-            instructor
-            location
-            blurb
+            buildingName
+            facilityName
+            hours
+            open
             imageUrl
-            isPublished
             createdAt
             updatedAt
+            classes{title, time, days{name}}
+            description
         }
     }
 `
-const SINGLE_NEWSITEM = gql`
+const SINGLE_FACILITY = gql`
     query($id:ID!){
-        NewsItem(id:$id){
+        Facility(id:$id){
             id
-            title
-            instructor
-            location
-            blurb
+            buildingName
+            facilityName
+            hours
+            open
             imageUrl
-            isPublished
             createdAt
             updatedAt
+            classes{title, time, days{name}}
+            description
         }
     }
 `
 
-const DELETE_NEWSITEM = gql`
-    mutation deleteNewsItem($id: ID!){
-        deleteNewsItem(id:$id){
+const DELETE_FACILITY = gql`
+    mutation deleteFactility($id: ID!){
+        deleteFacility(id:$id){
             id
         }
     }
 `
 
-const UPDATE_NEWSITEM = gql`
-    mutation($id: ID!,$instructor: String, $title:String, $location: String, $imageUrl:String, $blurb:String){
-        updateNewsItem(id:$id, instructor:$instructor, title:$title, location:$location, imageUrl:$imageUrl, blurb:$blurb){
+const UPDATE_FACILITY = gql`
+    mutation($id: ID!,$facilityName: String, $buildingName:String, $hours: String, $imageUrl:String, $description:String){
+        updateFacility(id:$id, facilityName:$facilityName, buildingName:$buildingName, hours:$hours, imageUrl:$imageUrl, description:$description){
             id
-            instructor
-            location
-            blurb
+            facilityName
+            buildingName
+            hours
             imageUrl
-            title
+            description
+            open
         }
     }
 `
 
-const CREATE_NEWSITEM = gql`
-    mutation($instructor: String, $title:String, $location: String, $imageUrl:String, $blurb:String){
-        createNewsItem(instructor:$instructor, title:$title, location:$location, imageUrl:$imageUrl, blurb:$blurb){
+const CREATE_FACILITY = gql`
+    mutation($facilityName: String, $buildingName:String, $hours: String, $imageUrl:String, $blurb:String){
+        createFacility(facilityName:$facilityName, buildingName:$buildingName, hours:$hours, imageUrl:$imageUrl, description:$blurb){
             id
-            instructor
-            location
-            blurb
+            facilityName
+            buildingName
+            hours
             imageUrl
-            title
+            description
         }
     }
 `
 
-const NEWSITEM_ISPUBLISHED = gql`
-    mutation updateIsPublished($id: ID!, $show: Boolean){
-        updateNewsItem(id:$id, isPublished: $show){
-            isPublished
+const IS_OPEN = gql`
+    mutation updateIsOpen($id: ID!, $open: Boolean){
+        updateFacility(id:$id, open: $open){
+            open
         }
     }
 `
 
-/*******Delete NewsItem**********/
-const RemoveNewsItem = ({id}) => {
+/*******Delete Facility**********/
+const RemoveFacility = ({id}) => {
     return (
         <Mutation
-            mutation={DELETE_NEWSITEM}
+            mutation={DELETE_FACILITY}
         >
-            {(deleteNewsItem, {data}) => (
+            {(deleteFacility, {data}) => (
                 <Ionicon icon="ios-trash" onClick={ () => {
                     if(window.confirm("Are you really, really sure you want to DELETE?  There's no take backs!")){
-                        deleteNewsItem({
+                        deleteFacility({
                             variables: {
                                 id
                             },
-                            refetchQueries: [ { query: ALL_NEWSITEMS }],
+                            refetchQueries: [ { query: ALL_FACILITY }],
                         });
-                        console.log("NewsItem with id: " + id + " was deleted");
+                        console.log("Facility with id: " + id + " was deleted");
                     }
                 }} fontSize="35px" color="black"/>
             )}
@@ -107,12 +110,12 @@ const RemoveNewsItem = ({id}) => {
     );
 };
 
-/*******Publish NewsItem**********/
+/*******Publish Facility**********/
 
-const EditIsPublished = ({id, checked}) => {
+const EditIsOpen = ({id, checked}) => {
     return(
-        <Mutation mutation={NEWSITEM_ISPUBLISHED}>
-            {(updateNewsItem, {data}) => (
+        <Mutation mutation={IS_OPEN}>
+            {(updateFacility, {data}) => (
                 <form style={{flexDirection: "row"}}>
                     <label>Yes</label>
                     <input
@@ -122,15 +125,15 @@ const EditIsPublished = ({id, checked}) => {
                         value={true}
                         checked={checked === true}
                         onChange={ e => {
-                            if(window.confirm("Do you want to publish to mobile App?")){
-                                updateNewsItem({
+                            if(window.confirm("Do you want to set to open?")){
+                                updateFacility({
                                     variables: {
                                         id,
-                                        show: true
+                                        open: true
                                     },
-                                    refetchQueries: [ { query: ALL_NEWSITEMS, variables: {id} }],
+                                    refetchQueries: [ { query: ALL_FACILITY, variables: {id} }],
                                 });
-                                console.log("NewsItem with id: " + id + " was updated to " + true);
+                                console.log("Facility with id: " + id + " was updated to " + true);
                             }
                         }}
                     />
@@ -142,15 +145,15 @@ const EditIsPublished = ({id, checked}) => {
                         checked={checked === false}
                         name={"False"}
                         onChange={ e => {
-                            if(window.confirm("Do you want to remove from published?")){
-                                updateNewsItem({
+                            if(window.confirm("Do you want to set facility to close?")){
+                                updateFacility({
                                     variables: {
                                         id,
-                                        show: false
+                                        open: false
                                     },
-                                    refetchQueries: [ { query: ALL_NEWSITEMS, variables: {id} }],
+                                    refetchQueries: [ { query: ALL_FACILITY, variables: {id} }],
                                 });
-                                console.log("NewsItem with id: " + id + " was updated to " + false);
+                                console.log("Facility with id: " + id + " was updated to " + false);
                             }
                         }}
                     />
@@ -160,23 +163,23 @@ const EditIsPublished = ({id, checked}) => {
     )
 };
 
-/*******Update NewsItem**********/
-class UpdateNewsItem extends React.Component{
+/*******Update Facility**********/
+class UpdateFacility extends React.Component{
     constructor(props){
         super(props);
 
         this.state={
-            title: undefined,
-            instructor: undefined,
-            location:undefined,
-            blurb: undefined,
+            facilityName: undefined,
+            buildingName: undefined,
+            hours:undefined,
+            description: undefined,
             imageUrl: undefined,
             gallery: [],
 
         };
         this.closeModal = this.closeModal.bind(this);
         this.openModal = this.openModal.bind(this);
-        this._handleNewsItemUpdateSubmit=this._handleNewsItemUpdateSubmit.bind(this);
+        this._handleFacilityUpdateSubmit=this._handleFacilityUpdateSubmit.bind(this);
     }
     openModal() {
         this.setState({modalIsOpen: true});
@@ -201,19 +204,19 @@ class UpdateNewsItem extends React.Component{
             })
             .catch(error => console.log(error));
     }
-    _handleNewsItemUpdateSubmit = async (id) => {
+    _handleFacilityUpdateSubmit = async (id) => {
         try{
             await this.props.mutate({
                 variables:{
                     id: id,
-                    title: this.state.title,
-                    instructor: this.state.instructor,
-                    location:this.state.location,
-                    blurb: this.state.blurb,
+                    facilityName: this.state.facilityName,
+                    buildingName: this.state.buildingName,
+                    hours:this.state.hours,
+                    description: this.state.description,
                     imageUrl: this.state.imageUrl,
                 },
                 refetchQueries:[
-                    {query: ALL_NEWSITEMS}
+                    {query: ALL_FACILITY}
                 ]
             })
         } catch (e) {
@@ -228,7 +231,7 @@ class UpdateNewsItem extends React.Component{
                 <div className={"justify-center alignItems-center"}>
                     <Ionicon icon="md-build" onClick={() => this.openModal()} fontSize="35px" color="gray"/>
                 </div>
-                <Query query={SINGLE_NEWSITEM} variables={{id: this.props.id}}>
+                <Query query={SINGLE_FACILITY} variables={{id: this.props.id}}>
                     {({loading, error, data}) => {
                         if (loading) return "Loading...";
                         if (error) return `Errro! ${error.message}`;
@@ -243,12 +246,12 @@ class UpdateNewsItem extends React.Component{
                                             color="blue"
                                         />
                                     </div>
-                                    <h2>Update NewsItem</h2>
+                                    <h2>Update Facility</h2>
                                     <form
                                         style={{textAlign: 'center', marginTop: 30}}
                                         onSubmit={async (e) => {
                                             e.preventDefault();
-                                            await this._handleNewsItemUpdateSubmit(data.NewsItem.id);
+                                            await this._handleFacilityUpdateSubmit(data.Facility.id);
                                             this.closeModal();
                                         }}
                                     >
@@ -265,14 +268,14 @@ class UpdateNewsItem extends React.Component{
                                                 padding: 10,
                                                 border: '1px solid gray'
                                             }}>
-                                                <label>Title:</label>
+                                                <label>FacilityName:</label>
                                                 <br/>
                                                 <input
                                                     style={{width: 260, paddingLeft: 10}}
-                                                    name={'title'}
+                                                    name={'facilityName'}
                                                     value={this.state.title}
-                                                    placeholder={data.NewsItem.title}
-                                                    onChange={(e) => this.setState({title: e.target.value})}
+                                                    placeholder={data.Facility.facilityName}
+                                                    onChange={(e) => this.setState({facilityName: e.target.value})}
                                                 />
                                             </div>
                                             <div style={{
@@ -282,13 +285,13 @@ class UpdateNewsItem extends React.Component{
                                                 padding: 10,
                                                 border: '1px solid gray'
                                             }}>
-                                                <label>Location:</label>
+                                                <label>BuildingName:</label>
                                                 <br/>
                                                 <input
                                                     style={{width: 300, paddingLeft: 10}}
-                                                    value={this.state.location}
-                                                    placeholder={data.NewsItem.location}
-                                                    onChange={(e) => this.setState({location: e.target.value})}
+                                                    value={this.state.buildingName}
+                                                    placeholder={data.Facility.buildingName}
+                                                    onChange={(e) => this.setState({buildingName: e.target.value})}
                                                 />
                                             </div>
                                             <div style={{
@@ -298,13 +301,13 @@ class UpdateNewsItem extends React.Component{
                                                 padding: 10,
                                                 border: '1px solid gray'
                                             }}>
-                                                <label>Instructor:</label>
+                                                <label>Hours:</label>
                                                 <br/>
                                                 <input
                                                     style={{width: 240, paddingLeft: 10}}
-                                                    value={this.state.instructor}
-                                                    placeholder={data.NewsItem.instructor}
-                                                    onChange={(e) => this.setState({instructor: e.target.value})}
+                                                    value={this.state.hours}
+                                                    placeholder={data.Facility.hours}
+                                                    onChange={(e) => this.setState({hours: e.target.value})}
                                                 />
                                             </div>
                                         </div>
@@ -324,10 +327,10 @@ class UpdateNewsItem extends React.Component{
                                                 <label> Image:</label>
                                                 <br/>
                                                 <img
-                                                    src={data.NewsItem.imageUrl}
+                                                    src={data.Facility.imageUrl}
                                                     width={'auto'}
                                                     height={100}
-                                                    alt={data.NewsItem.title}
+                                                    alt={data.Facility.facilityName}
                                                     style={{marginRight:10, marginBottom:10}}
                                                 />
                                                 <br/>
@@ -352,14 +355,14 @@ class UpdateNewsItem extends React.Component{
                                                 padding: 10,
                                                 border: '1px solid gray'
                                             }}>
-                                                <label style={{textAlign: 'center', marginRight: 20}}>Blurb:</label>
+                                                <label style={{textAlign: 'center', marginRight: 20}}>Description:</label>
                                                 <br/>
                                                 <textarea
                                                     style={{width: 600, padding: 10}}
                                                     rows={5}
-                                                    placeholder={data.NewsItem.blurb}
-                                                    value={this.state.blurb}
-                                                    onChange={(e) => this.setState({blurb: e.target.value})}
+                                                    placeholder={data.Facility.description}
+                                                    value={this.state.description}
+                                                    onChange={(e) => this.setState({description: e.target.value})}
                                                 />
                                             </div>
                                         </div>
@@ -384,17 +387,17 @@ class UpdateNewsItem extends React.Component{
     }
 }
 
-const UpdateTheNewsItem = graphql(UPDATE_NEWSITEM, {options: { fetchPolicy: 'network-only' }})(UpdateNewsItem);
+const UpdateTheFacility = graphql(UPDATE_FACILITY, {options: { fetchPolicy: 'network-only' }})(UpdateFacility);
 
-/*******Create NewsItem**********/
-class CreateNewsItem extends React.Component{
+/*******Create Facility**********/
+class CreateFacility extends React.Component{
     constructor(props){
         super(props);
 
         this.state={
-            title: undefined,
-            instructor: undefined,
-            location:undefined,
+            facilityName: undefined,
+            buildingName: undefined,
+            hours:undefined,
             blurb: undefined,
             imageUrl: undefined,
             gallery: [],
@@ -402,7 +405,7 @@ class CreateNewsItem extends React.Component{
         };
         this.closeModal = this.closeModal.bind(this);
         this.openModal = this.openModal.bind(this);
-        this._handleNewsItemCreateSubmit=this._handleNewsItemCreateSubmit.bind(this);
+        this._handleFacilityCreateSubmit=this._handleFacilityCreateSubmit.bind(this);
     }
 
     openModal() {
@@ -428,18 +431,18 @@ class CreateNewsItem extends React.Component{
             })
             .catch(error => console.log(error));
     }
-    _handleNewsItemCreateSubmit = async () => {
+    _handleFacilityCreateSubmit = async () => {
         try{
             await this.props.mutate({
                 variables:{
-                    title: this.state.title,
-                    instructor: this.state.instructor,
-                    location:this.state.location,
+                    facilityName: this.state.facilityName,
+                    buildingName: this.state.buildingName,
+                    hours:this.state.hours,
                     blurb: this.state.blurb,
                     imageUrl: this.state.imageUrl,
                 },
                 refetchQueries:[
-                    {query: ALL_NEWSITEMS}
+                    {query: ALL_FACILITY}
                 ]
             })
         } catch (e) {
@@ -466,45 +469,45 @@ class CreateNewsItem extends React.Component{
                                 color="blue"
                             />
                         </div>
-                        <h2>Create NewsItem</h2>
+                        <h2>Create Facility</h2>
                         <form
                             style={{textAlign: 'center', marginTop: 30}}
                             onSubmit={ async(e) => {
                                 e.preventDefault();
-                                await this._handleNewsItemCreateSubmit();
+                                await this._handleFacilityCreateSubmit();
                                 this.closeModal();
                             }}
                         >
                             <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', border: '1px solid gray' }}>
                                 <div style={{backgroundColor: "#f7f9dd", width: "33.333%", height: 180, padding:10, border: '1px solid gray' }}>
-                                    <label>Title:</label>
+                                    <label>FacilityName:</label>
                                     <br/>
                                     <input
                                         style={{width: 260, paddingLeft: 10}}
-                                        name={'title'}
-                                        value={this.state.title}
+                                        name={'facility name'}
+                                        value={this.state.facilityName}
                                         placeholder={'NewsItem Title'}
-                                        onChange={ (e) => this.setState({title: e.target.value})}
+                                        onChange={ (e) => this.setState({facilityName: e.target.value})}
                                     />
                                 </div>
                                 <div style={{backgroundColor: "#f7f9dd", width: "33.333%", height: 180, padding:10, border: '1px solid gray'  }}>
-                                    <label>Location:</label>
+                                    <label>BuildingName:</label>
                                     <br/>
                                     <input
                                         style={{width: 240, paddingLeft: 10}}
-                                        value={this.state.location}
-                                        placeholder = {'Location'}
-                                        onChange = {(e) => this.setState({location: e.target.value})}
+                                        value={this.state.buildingName}
+                                        placeholder = {'building name'}
+                                        onChange = {(e) => this.setState({buildingName: e.target.value})}
                                     />
                                 </div>
                                 <div style={{backgroundColor: "#f7f9dd", width: "33.333%", height: 180, padding:10, border: '1px solid gray'  }}>
-                                    <label>Instructor:</label>
+                                    <label>Hours:</label>
                                     <br/>
                                     <input
                                         style={{width: 240, paddingLeft: 10}}
-                                        value ={this.state.instructor}
-                                        placeholder = {'Instructor'}
-                                        onChange = {(e) => this.setState({instructor: e.target.value})}
+                                        value ={this.state.hours}
+                                        placeholder = {'hours'}
+                                        onChange = {(e) => this.setState({hours: e.target.value})}
                                     />
                                 </div>
                             </div>
@@ -556,23 +559,23 @@ class CreateNewsItem extends React.Component{
     }
 }
 
-const CreateTheNewsItem = graphql(CREATE_NEWSITEM, {options: { fetchPolicy: 'network-only' }})(CreateNewsItem);
+const CreateTheFacility = graphql(CREATE_FACILITY, {options: { fetchPolicy: 'network-only' }})(CreateFacility);
 
-/*******Component NewsItem**********/
-class NewsItem extends React.Component{
+/*******Component Facility**********/
+class FacilityList extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            isPublished: null,
+            isOpen: null,
         };
         this.changePublishedStatus = this.changePublishedStatus.bind(this);
     }
     changePublishedStatus(){
-        this.setState({isPublished: !this.state.isPublished});
+        this.setState({isOpen: !this.state.isOpen});
     }
     render(){
         return(
-            <Query query={ALL_NEWSITEMS}>
+            <Query query={ALL_FACILITY}>
                 {({loading, error, data}) => {
                     if(loading) return "Loading...";
                     if(error) return `Errro! ${error.message}`;
@@ -580,8 +583,8 @@ class NewsItem extends React.Component{
                         <div>
                             <NavigationBar/>
                             <div style={{display:'flex', flexDirection:'row'}}>
-                                <h2 style={{marginLeft:10}}>NewsItem</h2>
-                                <CreateTheNewsItem />
+                                <h2 style={{marginLeft:10}}>Facility</h2>
+                                <CreateTheFacility />
                             </div>
 
                             <div style={{justifyContent:"center", alignItems:"center", marginBottom: 40}}>
@@ -589,26 +592,26 @@ class NewsItem extends React.Component{
                                     <tbody>
                                     <tr style={{justifyContent:"center", textAlign: 'center'}}>
                                         <th className={"th"}>Image:</th>
-                                        <th className={"th"}>Title:</th>
-                                        <th className={"th"}>Instructor:</th>
+                                        <th className={"th"}>FacilityName:</th>
+                                        <th className={"th"}>BuildingName:</th>
                                         <th className={"th"}>Blurb:</th>
-                                        <th className={"th"}>Location:</th>
-                                        <th className={"th"}>Published:</th>
+                                        <th className={"th"}>Hours:</th>
+                                        <th className={"th"}>Open:</th>
                                         <th className={"th"}>Created/Updated:</th>
                                     </tr>
-                                    {data.allNewsItems.map(({title, createdAt, updatedAt, instructor, blurb, imageUrl, id, location, isPublished}) => (
+                                    {data.allFacilities.map(({facilityName, createdAt, updatedAt, buildingName, description, imageUrl, id, hours, open}) => (
                                             <tr key={id} style={{justifyContent:"center", textAlign: 'center'}}>
-                                                <td style={{ border:'2px solid black',  width: 200, }}><img style={{height: undefined, width: 'auto'}} src={imageUrl} alt={title} /></td>
-                                                <td style={{ border:'1px solid black',  width: 100, }}>{title}</td>
-                                                <td style={{ border:'1px solid black',  width: 100, }}>{instructor}</td>
-                                                <td style={{ border:'1px solid black',  width: 100, }}>{blurb}</td>
-                                                <td style={{ border:'1px solid black',  width: 70, }}>{location}</td>
-                                                <td className={"td"}><EditIsPublished id={id} checked={isPublished}/></td>
+                                                <td style={{ border:'2px solid black',  width: 200, }}><img style={{height: undefined, width: 'auto'}} src={imageUrl} alt={'facility image'} /></td>
+                                                <td style={{ border:'1px solid black',  width: 100, }}>{facilityName}</td>
+                                                <td style={{ border:'1px solid black',  width: 100, }}>{buildingName}</td>
+                                                <td style={{ border:'1px solid black',  width: 100, }}>{description}</td>
+                                                <td style={{ border:'1px solid black',  width: 70, }}>{hours}</td>
+                                                <td className={"td"}><EditIsOpen id={id} checked={open}/></td>
                                                 <td style={{ border:'1px solid black',  width: 100, }}>
                                                     c: {moment(createdAt).format("M/D/Y")} <br/> u: {moment(updatedAt).format("M/D/Y")}
                                                 </td>
-                                                <td style={{ border:'1px solid black',  width: 70, }}><RemoveNewsItem id={id}/></td>
-                                                <td style={{ border:'1px solid black',  width: 70, }}><UpdateTheNewsItem id={id}/></td>
+                                                <td style={{ border:'1px solid black',  width: 70, }}><RemoveFacility id={id}/></td>
+                                                <td style={{ border:'1px solid black',  width: 70, }}><UpdateTheFacility id={id}/></td>
                                             </tr>
                                         )
                                     )}
@@ -623,4 +626,4 @@ class NewsItem extends React.Component{
     }
 }
 
-export default NewsItem;
+export default FacilityList;

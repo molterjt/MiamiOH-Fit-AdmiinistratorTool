@@ -2,6 +2,7 @@ import React from 'react';
 import { Query, Mutation} from 'react-apollo';
 import gql from 'graphql-tag';
 import NavigationBar from './NavigationBar';
+import Ionicon from 'react-ionicons';
 
 
 const DELETE_COMMENT = gql`
@@ -31,21 +32,27 @@ const RemoveComment = ({id}) => {
     return (
         <Mutation
             mutation={DELETE_COMMENT}
+            refetchQueries={[COMMENT_LIST]}
         >
             {(deleteComment, {data}) => (
-                <button
-                    onClick={ e => {
+
+                <Ionicon icon="ios-trash" onClick={ e => {
                         if(window.confirm("Are you sure you want to DELETE?")){
                             deleteComment({
                                 variables: {
                                     id
-                                }
+                                },
+                                refetchQueries:[
+                                    {query: COMMENT_LIST}
+                                ]
+
+
                             });
                             console.log("Comment with id: " + id + " was deleted");
                         }
 
-                    }}
-                >Delete</button>
+                    }} fontSize="35px" color="black"/>
+
             )}
         </Mutation>
     );
@@ -76,8 +83,14 @@ class CommentList extends React.Component{
                                             <tr key={id}>
                                                 <td className={"td"}>{content}</td>
                                                 <td className={"td"}>{userComment.username}  {userComment.email}</td>
-                                                <td className={"td"}>{classComment.title}</td>
-                                                <td className={"td"}>{classComment.instructor.firstName}</td>
+                                                {classComment!== null
+                                                    ? (<td className={"td"}>{classComment.title}</td>)
+                                                    : (<td className={"td"}>FindYourFit Request</td>)
+                                                }
+                                                {classComment!== null
+                                                    ? (<td className={"td"}>{classComment.instructor.firstName}</td>)
+                                                    : (<td className={"td"}>Class Instructor Was Deleted!</td>)
+                                                }
                                                 <td className={"td"}>{createdAt.toString().substring(0, 10)} {createdAt.substring(11,19)}</td>
                                                 <td className={"td"}><RemoveComment id={id}/></td>
                                             </tr>

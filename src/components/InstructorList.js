@@ -33,6 +33,7 @@ const INSTRUCTOR_LIST=gql`
             createdAt
             updatedAt
             description
+            blurb
             _classesMeta{count}
         }
     }
@@ -46,15 +47,17 @@ const SINGLE_INSTRUCTOR = gql`
             lastName
             email
             description
+            blurb
             imageUrl
         }
+        allTrainers(orderBy: firstName_ASC){id, firstName, lastName}
     }
     
 `
 
 const UPDATE_INSTRUCTOR = gql`
-    mutation($id: ID!, $firstName: String, $lastName: String, $email: String, $description: String, $imageUrl: String){
-        updateInstructor(id: $id, firstName: $firstName, lastName: $lastName, email: $email, description: $description, imageUrl: $imageUrl ){
+    mutation($id: ID!, $firstName: String, $lastName: String, $email: String, $description: String, $imageUrl: String, $blurb: String,){
+        updateInstructor(id: $id, firstName: $firstName, lastName: $lastName, email: $email, description: $description, imageUrl: $imageUrl, blurb: $blurb ){
             id,
             firstName
             lastName
@@ -66,13 +69,14 @@ const UPDATE_INSTRUCTOR = gql`
 `
 
 const CREATE_INSTRUCTOR = gql`
-    mutation($firstName: String, $lastName: String, $email: String, $description: String, $imageUrl: String){
-        createInstructor(firstName: $firstName, lastName: $lastName, email: $email, description: $description, imageUrl: $imageUrl){
+    mutation($firstName: String, $lastName: String, $email: String, $description: String, $imageUrl: String, $blurb: String){
+        createInstructor(firstName: $firstName, lastName: $lastName, email: $email, description: $description, imageUrl: $imageUrl, blurb: $blurb){
             id
             firstName
             lastName
             email
             description
+            blurb
             imageUrl
         }
     }
@@ -113,6 +117,7 @@ class UpdateInstructor extends React.Component{
             lastName: undefined,
             email: undefined,
             description: undefined,
+            blurb: undefined,
             imageUrl: undefined,
             gallery: [],
 
@@ -154,6 +159,7 @@ class UpdateInstructor extends React.Component{
                     lastName: this.state.lastName,
                     email: this.state.email,
                     description: this.state.description,
+                    blurb: this.state.blurb,
                     imageUrl: this.state.imageUrl,
                 },
                 refetchQueries:[
@@ -176,6 +182,7 @@ class UpdateInstructor extends React.Component{
                         {({loading, error, data}) => {
                             if (loading) return "Loading...";
                             if (error) return `Errro! ${error.message}`;
+                            const trainerList = data.allTrainers;
                             return (
                                 <div>
 
@@ -209,9 +216,9 @@ class UpdateInstructor extends React.Component{
                                                             placeholder={data.Instructor.firstName}
                                                             onChange={ (e) => this.setState({firstName: e.target.value})}
                                                         />
-                                                    </div>
+                                                        <br/>
+                                                        <br/>
 
-                                                    <div style={{backgroundColor: "#c2d9c3", width: "30%", height: 180, padding:10, border: '1px solid gray'  }}>
                                                         <label>Last Name:</label>
                                                         <br/>
                                                         <input
@@ -219,6 +226,17 @@ class UpdateInstructor extends React.Component{
                                                             value ={this.state.lastName}
                                                             placeholder = {data.Instructor.lastName}
                                                             onChange = {(e) => this.setState({lastName: e.target.value})}
+                                                        />
+                                                    </div>
+
+                                                    <div style={{backgroundColor: "#c2d9c3", width: "30%", height: 180, padding:10, border: '1px solid gray'  }}>
+                                                        <label>Email:</label>
+                                                        <br/>
+                                                        <input
+                                                            style={{width: 240, paddingLeft: 10}}
+                                                            value ={this.state.email}
+                                                            placeholder = {data.Instructor.email}
+                                                            onChange = {(e) => this.setState({email: e.target.value})}
                                                         />
                                                     </div>
                                                     <div style={{backgroundColor: "#c2d9c3", width: "40%", height: 180, padding:10, border: '1px solid gray' }}>
@@ -245,19 +263,57 @@ class UpdateInstructor extends React.Component{
                                                         </select>
 
                                                     </div>
-                                                    <div style={{backgroundColor: "#c2d9c3", width: "100%", height: 180, padding:10, border: '1px solid gray' }}>
+                                                </div>
+                                                <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', border: '1px solid gray'}}>
+                                                    <div style={{backgroundColor: "#c2d9c3", width: "40%", height: 240, padding:10, border: '1px solid gray' }}>
                                                         <label style={{textAlign: 'center', marginRight: 20}}>Description:</label>
                                                         <br/>
                                                         <textarea
-                                                            style={{width: 600, padding:10}}
+                                                            style={{width: 400, padding:10}}
                                                             rows={5}
                                                             placeholder={data.Instructor.description}
                                                             value={this.state.description}
                                                             onChange={(e) => this.setState({description: e.target.value})}
                                                         />
                                                     </div>
+                                                        <br/>
+                                                    <div style={{backgroundColor: "#c2d9c3", width: "40%", height: 240, padding:10, border: '1px solid gray' }}>
+                                                        <label style={{textAlign: 'center', marginRight: 20}}>Certifications:</label>
+                                                        <br/>
+                                                        <textarea
+                                                            style={{width: 400, padding:10}}
+                                                            rows={5}
+                                                            placeholder={data.Instructor.blurb}
+                                                            value={this.state.blurb}
+                                                            onChange={(e) => this.setState({blurb: e.target.value})}
+                                                        />
+                                                    </div>
+                                                    <div style={{backgroundColor: "#c2d9c3", width: "20%", height: 240, padding:10, border: '1px solid gray'}}>
+                                                        <label style={{textAlign: 'center', marginRight: 20}}>Also a Trainer?</label>
+                                                        <br />
+                                                        <select
+                                                            name={"alsoTrainer"}
+                                                            value={this.state.location}
+                                                            onChange={(e) => {
+                                                                this.setState({location: e.target.value});
+                                                            }}
+                                                            className={"form-select"}
+                                                        >
+                                                            <option>Match Trainer Identity</option>
+                                                            {trainerList.map((obj) =>
+                                                                <option
+                                                                    key={obj.id}
+                                                                    value={obj.id}
+                                                                >
+                                                                    {obj.firstName + " " + obj.lastName}
+                                                                </option>
 
+                                                            )}
+                                                        </select>
+                                                    </div>
                                                 </div>
+                                                    <br/>
+
                                                 <br />
                                                 <button
                                                     title={"Submit"}
@@ -291,6 +347,7 @@ class CreateInstructor extends React.Component{
             lastName: undefined,
             email: undefined,
             description: undefined,
+            blurb: undefined,
             imageUrl: undefined,
             isTrainer: false,
             gallery: [],
@@ -333,6 +390,7 @@ class CreateInstructor extends React.Component{
                 lastName: this.state.lastName,
                 email: this.state.email,
                 description: this.state.description,
+                blurb: this.state.blurb,
                 imageUrl: this.state.imageUrl,
             },
             refetchQueries:[
@@ -421,7 +479,7 @@ class CreateInstructor extends React.Component{
                                     </div>
 
                                     <div style={{backgroundColor: "#f7f9dd", marginBottom: 30}}>
-                                        <label style={{textAlign: 'center', marginRight: 15, }}>Description:</label>
+                                        <label style={{textAlign: 'center', marginRight: 15, }}>Description & Certifications:</label>
                                         <br/>
                                         <textarea
                                             style={{width: 600}}
@@ -429,6 +487,14 @@ class CreateInstructor extends React.Component{
                                             placeholder={" Description"}
                                             value={this.state.description}
                                             onChange={(e) => this.setState({description: e.target.value})}
+                                        />
+                                        <br/>
+                                        <textarea
+                                            style={{width: 600}}
+                                            rows={3}
+                                            placeholder={"Certification"}
+                                            value={this.state.blurb}
+                                            onChange={(e) => this.setState({blurb: e.target.value})}
                                         />
                                     </div>
                             </div>
@@ -477,6 +543,7 @@ class InstructorList extends React.Component{
                                         <th className={"th"}>Name:</th>
                                         <th className={"th"}>Email:</th>
                                         <th className={"th"}>Description:</th>
+                                        <th className={"th"}>Blurb:</th>
                                         <th className={"th"}>Created/Updated:</th>
                                         <th className={"th"}>Class Count:</th>
                                         <th className={"th"}>ClassList:</th>
@@ -484,7 +551,7 @@ class InstructorList extends React.Component{
                                         <th className={"th"}>TrainerWorkouts:</th>
 
                                     </tr>
-                                    {data.allInstructors.map(({id, firstName, lastName, email, description, createdAt, updatedAt,
+                                    {data.allInstructors.map(({id, firstName, lastName, email, description, createdAt, updatedAt,blurb,
                                                                   classes, instructorId, alsoTrainer, imageUrl, isTrainer, _classesMeta}) => (
                                             <tr key={id}>
                                                 <td style={{ border:'2px solid black',  width: 150, }}><img style={{height: undefined, width: 'auto'}} src={imageUrl} alt={firstName} /></td>
@@ -492,6 +559,7 @@ class InstructorList extends React.Component{
 
                                                 <td style={{ border:'1px solid black',  width: 100, padding: 3  }}>{email}</td>
                                                 <td style={{ border:'1px solid black',  minWidth: 200,}}>{description}</td>
+                                                <td style={{ border:'1px solid black',  minWidth: 100,}}>{blurb}</td>
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1}}>c: {moment(createdAt).format("M/D/Y")}<br/>u: {moment(updatedAt).format("M/D/Y")}</td>
                                                 <td style={{ border:'1px solid black',  width: 30, }}>{_classesMeta.count}</td>
                                                 <td style={{ border:'1px solid black',  width: 150, }}>

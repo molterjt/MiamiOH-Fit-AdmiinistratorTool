@@ -6,6 +6,7 @@ import moment from 'moment';
 import Ionicon from 'react-ionicons'
 import axios from "axios/index";
 import Modal from "react-modal";
+import {sortBy} from "lodash";
 
 
 const album_id = '2Kk4EVi';
@@ -184,6 +185,7 @@ class UpdateExercise extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <div className={"justify-center alignItems-center"}>
@@ -267,7 +269,7 @@ class UpdateExercise extends React.Component{
                                                             className={"form-select"}
                                                         >
                                                             <option style={{marginLeft: 10}}>Select New Image</option>
-                                                            {this.state.gallery.map((obj) => (
+                                                            {imageList.map((obj) => (
                                                                 <option key={obj.id} value={obj.link}>
                                                                     {obj.title}
                                                                 </option>
@@ -392,6 +394,7 @@ class CreateExercise extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <button
@@ -460,7 +463,7 @@ class CreateExercise extends React.Component{
                                         className={"form-select"}
                                     >
                                         <option style={{marginLeft: 10}}>Select New Image</option>
-                                        {this.state.gallery.map((obj) => (
+                                        {imageList.map((obj) => (
                                             <option key={obj.id} value={obj.link}>
                                                 {obj.title}
                                             </option>

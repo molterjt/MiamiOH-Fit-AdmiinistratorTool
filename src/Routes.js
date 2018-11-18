@@ -14,6 +14,8 @@ import InstructorList from "./components/InstructorList";
 import NotFound from "./components/NotFound";
 import ExerciseList from "./components/ExerciseList";
 import GroupFitClassList from "./components/GroupFitClassList";
+import FacilityList from './components/FacilityList';
+import UserCheckInList from './components/UserCheckInList';
 import RouteController from './components/RouteController';
 
 
@@ -24,6 +26,7 @@ export default ({childProps}) =>
         <RouteController  path={'/exercises'} exact component={ExerciseList} props={childProps}/>
         <RouteController  path={'/groupfitclasses'} exact component={GroupFitClassList} props={childProps} />
         <RouteController  path={'/userlist'} exact component={UserLIst} props={childProps}/>
+        <RouteController  path={'/usercheckinlist'} exact component={UserCheckInList} props={childProps}/>
         <RouteController  path={'/comments'} exact component={CommentList} props={childProps}/>
         <RouteController  path={'/instructors'} exact component={InstructorList} props={childProps}/>
         <RouteController  path={'/trainers'} exact component={TrainerList} props={childProps}/>
@@ -32,6 +35,7 @@ export default ({childProps}) =>
         <RouteController  path={'/eventList'} exact component={EventList} props={childProps}/>
         <RouteController  path={'/newsItems'}  exact component={NewsItem} props={childProps}/>
         <RouteController  path={'/marketingAds'} exact component={MarketingAd} props={childProps}/>
+        <RouteController  path={'/facilityList'} exact component={FacilityList} props={childProps}/>
 
 
 

@@ -6,6 +6,7 @@ import moment from 'moment';
 import Ionicon from 'react-ionicons'
 import axios from "axios/index";
 import Modal from "react-modal";
+import {sortBy} from "lodash";
 
 const album_id = '2Kk4EVi';
 const Imgur_Client_Id = '06e18547aec23a5';
@@ -223,6 +224,7 @@ class UpdateWorkout extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <div className={"justify-center alignItems-center"}>
@@ -285,7 +287,7 @@ class UpdateWorkout extends React.Component{
                                                             src={data.Workout.imageUrl}
                                                             width={160}
                                                             height={100}
-                                                            alt={"GroupFitClass"}
+                                                            alt={"Workout Image"}
                                                             style={{marginRight: 10, marginBottom: 10}}
                                                         />
                                                         <br/>
@@ -296,7 +298,7 @@ class UpdateWorkout extends React.Component{
                                                             className={"form-select"}
                                                         >
                                                             <option style={{marginLeft: 10}}>Select New Image</option>
-                                                            {this.state.gallery.map((obj) => (
+                                                            {imageList.map((obj) => (
                                                                 <option key={obj.id} value={obj.link}>
                                                                     {obj.title}
                                                                 </option>
@@ -462,6 +464,7 @@ class CreateWorkout extends React.Component{
         }
     };
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <button
@@ -518,7 +521,7 @@ class CreateWorkout extends React.Component{
                                         className={"form-select"}
                                     >
                                         <option style={{marginLeft: 10}}>Select New Image</option>
-                                        {this.state.gallery.map((obj) => (
+                                        {imageList.map((obj) => (
                                             <option key={obj.id} value={obj.link}>
                                                 {obj.title}
                                             </option>
@@ -700,10 +703,14 @@ class WorkoutList extends React.Component {
                                                     </div>
                                                     ))}
                                                 </td>
-                                                <td style={{ border:'1px solid black',  width: 100, padding:1 }}>{author.firstName}</td>
+                                                {author
+                                                    ? (<td style={{ border:'1px solid black',  width: 100, padding:1 }}>{author.firstName}</td>)
+                                                    : (<td style={{ border:'1px solid black',  width: 100, padding:1 }}>{'un-assigned'}</td>)
+                                                }
+
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1}}>{date}</td>
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1 }}>{description}</td>
-                                                <td className={"td"}><EditIsPublished id={id} checked={isPublished}/></td>
+                                                <td style={{ border:'1px solid black',  minWidth: 120, padding:1 }}><EditIsPublished id={id} checked={isPublished}/></td>
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1}}>c: {moment(createdAt).format("M/D/Y")}<br/>u: {moment(updatedAt).format("M/D/Y")}</td>
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1}}><RemoveWorkout id={id}/></td>
                                                 <td style={{ border:'1px solid black',  width: 100, padding:1}}><UpdateTheWorkout id={id}/></td>

@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TimePicker from 'material-ui/TimePicker';
 import DatePicker from 'material-ui/DatePicker';
+import {sortBy} from "lodash";
 
 const album_id = '2Kk4EVi';
 const Imgur_Client_Id = '06e18547aec23a5';
@@ -330,6 +331,7 @@ class CreateEvent extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <button
@@ -401,7 +403,7 @@ class CreateEvent extends React.Component{
                                         className={"form-select"}
                                     >
                                         <option style={{marginLeft: 10}}>Select New Image</option>
-                                        {this.state.gallery.map((obj) => (
+                                        {imageList.map((obj) => (
                                             <option key={obj.id} value={obj.link}>
                                                 {obj.title}
                                             </option>
@@ -638,6 +640,7 @@ class UpdateEvent extends React.Component{
     };
 
     render(){
+        const imageList = sortBy(this.state.gallery, "title");
         return(
             <div>
                 <div className={"justify-center alignItems-center"}>
@@ -722,7 +725,7 @@ class UpdateEvent extends React.Component{
                                                             className={"form-select"}
                                                         >
                                                             <option style={{marginLeft: 10}}>Select New Image</option>
-                                                            {this.state.gallery.map((obj) => (
+                                                            {imageList.map((obj) => (
                                                                 <option key={obj.id} value={obj.link}>
                                                                     {obj.title}
                                                                 </option>
