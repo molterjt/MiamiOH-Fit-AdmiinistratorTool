@@ -112,8 +112,14 @@ const DELETE_GFCLASS = gql`
 `
 
 const GF_CLASS_LIST = gql`
-    query{
-        allGroupFitClasses(orderBy:title_ASC){
+    query($searchTitle:String, $daySearch:String, $instructorSearch: String, $seasonSearch:String){
+        allGroupFitClasses(
+            filter:{
+                title_contains:$searchTitle 
+                days_some:{name_contains: $daySearch}
+                instructor:{firstName_contains: $instructorSearch}
+                season_contains:$seasonSearch
+            }orderBy:title_ASC){
             id
             imageUrl
             title
@@ -123,6 +129,7 @@ const GF_CLASS_LIST = gql`
             cancelled
             startTime
             endTime
+            season
             createdAt
             isPublished
             location{facilityName, id}
@@ -147,6 +154,7 @@ const SINGLE_GF_CLASS = gql`
             cancelled
             startTime
             endTime
+            season
             instructor{firstName, lastName email, id}
             isPublished
             location{facilityName, id}
@@ -180,8 +188,8 @@ const GF_CLASS_ISCANCELLED = gql`
 
 
 const UPDATE_GFCLASS = gql`    
-    mutation updateGroupFitClassListing($id: ID!, $title: String, $time: String,  $idGFI: ID!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $description: String, $imageUrl: String, $location: ID, $category: [ID!]) {
-        updateGroupFitClass(id: $id, title: $title, time: $time, daysIds: $daysArr, startTime: $startTime, endTime: $endTime, description: $description, imageUrl: $imageUrl, locationId: $location, categoryIds: $category) {
+    mutation updateGroupFitClassListing($id: ID!, $title: String, $time: String,  $idGFI: ID!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $description: String, $imageUrl: String, $location: ID, $category: [ID!], $season:String) {
+        updateGroupFitClass(id: $id, title: $title, time: $time, daysIds: $daysArr, startTime: $startTime, endTime: $endTime, description: $description, imageUrl: $imageUrl, locationId: $location, categoryIds: $category, season: $season) {
             id
             title
             time
@@ -189,6 +197,7 @@ const UPDATE_GFCLASS = gql`
             endTime
             imageUrl
             description
+            season
             category{title, id}
             location{facilityName, id}
             instructor {
@@ -218,8 +227,8 @@ const UPDATE_GFCLASS = gql`
 `
 
 const CREATE_GFCLASS = gql`
-    mutation ($title: String!, $time: String!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $idGFI: ID!, $location: ID, $imageUrl: String, $description: String, $category: [ID!]) {
-        createGroupFitClass(title: $title, time: $time, daysIds: $daysArr, instructorId: $idGFI, locationId: $location, imageUrl: $imageUrl, description: $description,  startTime: $startTime, endTime: $endTime, categoryIds: $category) {
+    mutation ($title: String!, $time: String!, $daysArr: [ID!], $startTime: DateTime, $endTime: DateTime, $idGFI: ID!, $location: ID, $imageUrl: String, $description: String, $category: [ID!], $season:String ) {
+        createGroupFitClass(title: $title, time: $time, daysIds: $daysArr, instructorId: $idGFI, locationId: $location, imageUrl: $imageUrl, description: $description,  startTime: $startTime, endTime: $endTime, categoryIds: $category, season:$season) {
             id
             title
             time
@@ -230,6 +239,7 @@ const CREATE_GFCLASS = gql`
             description
             startTime
             endTime
+            season
         }
     }
 
@@ -379,6 +389,7 @@ class UpdateGroupFitClass extends React.Component{
             displayTime: undefined,
             imageUrl: undefined,
             location: undefined,
+            season: undefined,
             gallery: [],
             startDate: null,
             startTime: null,
@@ -546,6 +557,7 @@ class UpdateGroupFitClass extends React.Component{
                     imageUrl: this.state.imageUrl,
                     location: this.state.location,
                     category: this.state.categoryTypes,
+                    season: this.state.season,
                 },
                 refetchQueries:[
                     {query: GF_CLASS_LIST,},
@@ -672,27 +684,37 @@ class UpdateGroupFitClass extends React.Component{
                                                     </select>
                                                     </div>
                                                     <div style={{backgroundColor: "#c2d9c3", width: "33.33%", height: 250, padding:10, border: '1px solid gray' }}>
-                                                    <label>Location: </label>
-                                                    <br/>
-                                                    <select
-                                                        name={"location"}
-                                                        value={this.state.location}
-                                                        onChange={(e) => {
-                                                            this.setState({location: e.target.value});
-                                                        }}
-                                                        className={"form-select"}
-                                                    >
-                                                        <option>{data.GroupFitClass.location.facilityName}</option>
-                                                        {facilityList.map((obj) =>
-                                                            <option
-                                                                key={obj.id}
-                                                                value={obj.id}
-                                                            >
-                                                                {obj.facilityName}
-                                                            </option>
+                                                        <label>Location: </label>
+                                                        <br/>
+                                                        <select
+                                                            name={"location"}
+                                                            value={this.state.location}
+                                                            onChange={(e) => {
+                                                                this.setState({location: e.target.value});
+                                                            }}
+                                                            className={"form-select"}
+                                                        >
+                                                            <option>{data.GroupFitClass.location.facilityName}</option>
+                                                            {facilityList.map((obj) =>
+                                                                <option
+                                                                    key={obj.id}
+                                                                    value={obj.id}
+                                                                >
+                                                                    {obj.facilityName}
+                                                                </option>
 
-                                                        )}
-                                                    </select>
+                                                            )}
+                                                        </select>
+                                                        <label>Season: </label>
+                                                        <br/>
+                                                        <input
+                                                            style={{width: 240}}
+                                                            name={'season'}
+                                                            value={this.state.season}
+                                                            placeholder={data.GroupFitClass.season}
+                                                            onChange={ (e) => this.setState({season: e.target.value})}
+                                                        />
+
                                                     </div>
                                                     <div style={{backgroundColor: "#c2d9c3", width: "33.33%", height: 250, padding:10, border: '1px solid gray' }}>
                                                     <label style={{textAlign: 'center', marginRight: 20}}>Description:</label>
@@ -872,6 +894,7 @@ class CreateGroupFitClass extends React.Component{
             displayTime: undefined,
             imageUrl: undefined,
             location: undefined,
+            season: undefined,
             gallery: [],
             startDate: null,
             startTime: null,
@@ -1060,6 +1083,7 @@ class CreateGroupFitClass extends React.Component{
                     endTime: end,
                     location: this.state.location,
                     category: this.state.categoryTypes,
+                    season: this.state.season,
 
                 },
                 refetchQueries:[
@@ -1118,6 +1142,17 @@ class CreateGroupFitClass extends React.Component{
                                             value ={this.state.displayTime}
                                             placeholder = {"time"}
                                             onChange = {(e) => this.setState({displayTime: e.target.value})}
+                                        />
+                                    </div>
+                                    <div style={{position: 'center', display: "flex", flexDirection: "row", marginRight: 30, textAlign:'center', justifyContent:'center', flexAlign: 'center', alignItems: 'center'}}>
+                                        <label  style={{marginRight: 15, }}>Class Season:</label>
+                                        <br/>
+                                        <input
+                                            style={{width: 240, textAlign: 'center'}}
+                                            name={'season'}
+                                            value={this.state.season}
+                                            placeholder={"season"}
+                                            onChange={ (e) => this.setState({season: e.target.value})}
                                         />
                                     </div>
                                 </div>
@@ -1321,6 +1356,10 @@ class GroupFitClassList extends React.Component{
         super();
         this.state = {
             isPublished: null,
+            searchTitle: undefined,
+            daySearch: undefined,
+            instructorSearch: undefined,
+            seasonSearch: undefined,
         };
         this.changePublishedStatus = this.changePublishedStatus.bind(this);
     }
@@ -1329,14 +1368,53 @@ class GroupFitClassList extends React.Component{
     }
     render(){
         return(
-            <Query query={GF_CLASS_LIST}>
+            <div>
+                <NavigationBar/>
+                <div style={{flexDirection:'row', display:'flex'}}>
+                    <div style={{flexDirection: 'row',backgroundColor: "#000", width: "20%", height: 'auto', padding:8, border: '1px solid gray' }}>
+                        <input
+                            style={{width: '100%', paddingLeft: 10}}
+                            name={'Class Search'}
+                            value={this.state.searchTitle}
+                            placeholder={'Search Class By Title'}
+                            onChange={ (e) => this.setState({searchTitle: e.target.value})}
+                        />
+                    </div>
+                    <div style={{flexDirection: 'row',backgroundColor: "#000", width: "20%", height: 'auto', padding:8, border: '1px solid gray' }}>
+                        <input
+                            style={{width: '100%', paddingLeft: 10}}
+                            name={'Day Search'}
+                            value={this.state.daySearch}
+                            placeholder={'Search Class By Day'}
+                            onChange={ (e) => this.setState({daySearch: e.target.value})}
+                        />
+                    </div>
+                    <div style={{flexDirection: 'row',backgroundColor: "#000", width: "20%", height: 'auto', padding:8, border: '1px solid gray' }}>
+                        <input
+                            style={{width: '100%', paddingLeft: 10}}
+                            name={'Instructor Search'}
+                            value={this.state.instructorSearch}
+                            placeholder={'Search Class By Instructor First Name'}
+                            onChange={ (e) => this.setState({instructorSearch: e.target.value})}
+                        />
+                    </div>
+                    <div style={{flexDirection: 'row',backgroundColor: "#000", width: "20%", height: 'auto', padding:8, border: '1px solid gray' }}>
+                        <input
+                            style={{width: '100%', paddingLeft: 10}}
+                            name={'Season Search'}
+                            value={this.state.seasonSearch}
+                            placeholder={'Search Class By Season'}
+                            onChange={ (e) => this.setState({seasonSearch: e.target.value})}
+                        />
+                    </div>
+                </div>
+            <Query query={GF_CLASS_LIST} variables={{searchTitle:this.state.searchTitle, daySearch:this.state.daySearch, instructorSearch:this.state.instructorSearch, seasonSearch:this.state.seasonSearch}}>
                 {({loading, error, data}) => {
                     if(loading) return "Loading...";
                     if(error) return `Error! ${error.message}`;
 
                     return(
                         <div>
-                            <NavigationBar/>
                             <div style={{display:'flex', flexDirection:'row', marginLeft: 10}}>
                                 <h2>GroupFit Class</h2>
                                 <CreateTheGFClass facilityList={data.allFacilities} instructorList={data.allInstructors} days={data.allDays} categoryList={data.allGroupFitnessClassCategories}/>
@@ -1356,8 +1434,9 @@ class GroupFitClassList extends React.Component{
                                         <th className={"th"}>End DateTime</th>
                                         <th className={"th"}>Location & Type</th>
                                         <th className={"th"}>Description</th>
+                                        <th className={"th"}>Season</th>
                                     </tr>
-                                {data.allGroupFitClasses.map(({title, time, id, days, instructor, cancelled, isPublished, imageUrl, startTime, endTime, location, description, category}) => (
+                                {data.allGroupFitClasses.map(({title, time, id, days, instructor, cancelled, isPublished, imageUrl, startTime, endTime, location, description, category,season}) => (
                                     <tr key={id}>
                                         <td style={{ border:'2px solid black',  width: 150, textAlign: 'center'}}><img style={{height: 100, width: 160}} src={imageUrl} alt={title} /></td>
                                         <td className={"td"}>{title}</td>
@@ -1374,6 +1453,7 @@ class GroupFitClassList extends React.Component{
                                         <td className={"td"}>{moment(endTime).format('h:mm a')} <br/><br/> {moment(endTime).format("M/D/Y")}</td>
                                         <td className={"td"}>{location.facilityName} <br /> <br/>{category.map(({title}) => title).join(', ')}</td>
                                         <td className={"td"}>{description}</td>
+                                        <td className={"td"}>{season}</td>
                                         <td className={"td"}><RemoveGFClass id={id}/></td>
                                         <td className={"td"}><UpdateTheGFClass id={id}/></td>
                                     </tr>
@@ -1386,6 +1466,7 @@ class GroupFitClassList extends React.Component{
                     );
                 }}
             </Query>
+            </div>
         );
     }
 }

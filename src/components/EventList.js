@@ -29,6 +29,7 @@ const ALL_EVENTS = gql`
             name
             isPublished
             imageUrl
+            _checkinsMeta{count}
             date
             fees
             time
@@ -887,11 +888,12 @@ class EventList extends React.Component{
                                     <th className={"th"}>Publish Date/Time:</th>
                                     <th className={"th"}>Fees:</th>
                                     <th className={"th"}>Description:</th>
+                                    <th className={"th"}>Check-Ins:</th>
                                     <th className={"th"}>Location:</th>
                                     <th className={"th"}>Published:</th>
                                     <th className={"th"}>Created/Updated:</th>
                                 </tr>
-                                {data.allEvents.map(({name, createdAt, updatedAt, fees, publishDate, time, imageUrl, id, date, isPublished, description, location}) => (
+                                {data.allEvents.map(({name, createdAt, updatedAt, fees, publishDate, time, imageUrl, id, date, isPublished, description, location, _checkinsMeta}) => (
                                         <tr key={id} style={{justifyContent:"center", textAlign: 'center'}}>
                                             <td style={{ border:'2px solid black',  width: 200, }}><img style={{height: undefined, width: 'auto'}} src={imageUrl} alt={name} /></td>
                                             <td style={{ border:'1px solid black',  width: 100, }}>{name}</td>
@@ -899,6 +901,7 @@ class EventList extends React.Component{
                                             <td style={{ border:'1px solid black',  width: 100, }}>{moment(publishDate).format("M/D/Y h:mm a")}</td>
                                             <td style={{ border:'1px solid black',  width: 70, }}>{fees}</td>
                                             <td style={{ border:'1px solid black',  width: 300, }}>{description}</td>
+                                            <td style={{ border:'1px solid black',  width: 70, }}>{_checkinsMeta.count}</td>
                                             <td style={{ border:'1px solid black',  width: 100, }}>{location.facilityName}</td>
                                             <td className={"td"}><EditIsPublished id={id} checked={isPublished}/></td>
                                             <td style={{ border:'1px solid black',  width: 100, }}>

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/MiamiOH-Fit-Admin-Portal.iml" filepath="$PROJECT_DIR$/.idea/MiamiOH-Fit-Admin-Portal.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/fitness-app-admin.iml" filepath="$PROJECT_DIR$/.idea/fitness-app-admin.iml" />
     </modules>
   </component>

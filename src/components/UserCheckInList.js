@@ -24,6 +24,53 @@ const USER_CHECKINS = gql`
     }
 `
 
+const ALL_CHECKINS = gql`
+    query{
+        allCheckins{
+            id
+            events{name, _checkinsMeta{count}}
+            classes{title, _checkinsMeta{count}}
+            workouts{title, _checkinsMeta{count}}
+        }
+    }
+`
+
+
+class AllCheckinList extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={};
+    }
+    render(){
+        return(
+            <Query query={ALL_CHECKINS}>
+                {({loading, error, data}) => {
+                    if (loading) return "Loading...";
+                    if (error) return `Error! ${error.message}`;
+                    return (
+                        <div>
+                            <table style={{margin: 10, padding: 20, border:'1px solid black', textAlign:'center',}}>
+                                <tbody>
+                                <tr>
+                                    <th className={'th'}>Events</th>
+                                    <th className={'th'}>Event-Checkins:</th>
+                                    <th className={'th'}>Classes:</th>
+                                    <th className={'th'}>Class-Checkins:</th>
+                                    <th className={'th'}>Workouts:</th>
+                                    <th className={'th'}>Workout-Checkins:</th>
+                                </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+                    );
+                }}
+            </Query>
+        );
+    }
+}
+
 
 class UserCheckInList extends React.Component{
     constructor(props){
@@ -42,6 +89,7 @@ class UserCheckInList extends React.Component{
                         <div>
                             <NavigationBar/>
                             <div>
+                                <AllCheckinList/>
                                 <table style={{margin: 10, padding: 20, border:'1px solid black', textAlign:'center',}}>
                                     <tbody>
                                     <tr>

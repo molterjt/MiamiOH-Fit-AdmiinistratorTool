@@ -20,8 +20,8 @@ const DELETE_INSTRUCTOR = gql`
 `
 
 const INSTRUCTOR_LIST=gql`
-    query{
-        allInstructors(orderBy: lastName_ASC){
+    query($searchName: String){
+        allInstructors(filter:{firstName_contains: $searchName}orderBy: lastName_ASC){
             id
             firstName
             lastName
@@ -522,18 +522,40 @@ const CreateTheInstructor = graphql(CREATE_INSTRUCTOR, {options: { fetchPolicy: 
 /*******Component Instructor**********/
 
 class InstructorList extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            searchName: undefined
+        }
+    }
+    component
     render(){
         return(
-            <Query query={INSTRUCTOR_LIST}>
+            <div>
+                <NavigationBar/>
+                <div style={{flexDirection: 'row',backgroundColor: "#000", width: "20%", height: 'auto', padding:8, border: '1px solid gray' }}>
+                    <input
+                        style={{width: '100%', paddingLeft: 10}}
+                        name={'Instructor Search'}
+                        value={this.state.searchName}
+                        placeholder={'Search Instructor By First Name'}
+                        onChange={ (e) => this.setState({searchName: e.target.value})}
+                    />
+                </div>
+
+
+
+            <Query query={INSTRUCTOR_LIST} variables={{searchName: this.state.searchName}}>
                 {({loading, error, data}) => {
                     if(loading) return "Loading...";
                     if(error) return `Errro! ${error.message}`;
                     return(
                         <div>
-                            <NavigationBar/>
+
                             <div style={{display:'flex', flexDirection:'row'}}>
                                 <h2 style={{marginLeft: 20}}>Instructor:</h2>
                                 <CreateTheInstructor />
+
                             </div>
                             <div style={{width:"95%", alignItems:'center', marginLeft: 20, marginBottom: 50}} >
                                 <table style={{border:'1px solid black', }}>
@@ -588,6 +610,7 @@ class InstructorList extends React.Component{
                     );
                 }}
             </Query>
+            </div>
         );
     }
 }
